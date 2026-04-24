@@ -1,0 +1,27 @@
+[
+  {
+    "id": "q1",
+    "prompt": "What is machine learning? Explain in 2-3 sentences.",
+    "reference_answer": "Machine learning is a subset of artificial intelligence that enables computer systems to learn and improve from experience without being explicitly programmed. It uses algorithms to identify patterns in data and make predictions or decisions based on those patterns."
+  },
+  {
+    "id": "q2",
+    "prompt": "How do neural networks work? Give a simple explanation.",
+    "reference_answer": "Neural networks are computing systems inspired by biological neurons. They consist of interconnected nodes (neurons) organized in layers. Data passes through these layers, with each connection having a weight that gets adjusted during training to minimize errors."
+  },
+  {
+    "id": "q3",
+    "prompt": "What is the difference between AI and machine learning?",
+    "reference_answer": "AI (Artificial Intelligence) is the broad field of creating intelligent machines, while machine learning is a specific subset of AI that focuses on algorithms that can learn from data. Not all AI systems use machine learning - some use rule-based systems or other approaches."
+  },
+  {
+    "id": "q4",
+    "prompt": "Explain quantum computing in simple terms.",
+    "reference_answer": "Quantum computing uses quantum bits (qubits) instead of regular bits. Unlike classical bits that are 0 or 1, qubits can be both simultaneously (superposition). This allows quantum computers to process many possibilities in parallel, making them potentially much faster for specific types of problems."
+  },
+  {
+    "id": "q5",
+    "prompt": "What is blockchain and how does it work?",
+    "reference_answer": "Blockchain is a distributed ledger technology that records transactions in blocks linked cryptographically. Each block contains data and a hash of the previous block. This creates an immutable chain where changing past records would require redoing all subsequent blocks, making it secure and transparent."
+  }
+]
