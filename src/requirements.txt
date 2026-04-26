@@ -1,0 +1,18 @@
+# Core
+torch==2.0.0
+transformers==4.30.0
+accelerate==0.20.0
+
+# Inference
+bitsandbytes==0.40.0  # For quantization
+
+# Utils
+numpy==1.24.0
+pyyaml==6.0
+psutil==5.9.5
+
+# Testing
+pytest==7.3.0
+
+# Evaluation
+scikit-learn==1.3.0

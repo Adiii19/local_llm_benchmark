@@ -1,0 +1,45 @@
+# Benchmark Configuration
+
+# Model settings
+models:
+  - name: "Mistral 7B"
+    model_id: "mistralai/Mistral-7B-Instruct-v0.1"
+    enabled: true
+  
+  - name: "Llama 2 13B"
+    model_id: "meta-llama/Llama-2-13b-chat-hf"
+    enabled: true
+  
+  - name: "Neural Chat 7B"
+    model_id: "Intel/neural-chat-7b-v3-1"
+    enabled: true
+
+# Inference settings
+inference:
+  max_new_tokens: 256
+  temperature: 0.7
+  top_p: 0.9
+  top_k: 50
+  repetition_penalty: 1.0
+
+# Benchmark settings
+benchmark:
+  num_prompts: 5
+  num_runs_per_prompt: 1
+  quantizations:
+    - "fp32"
+    # - "int8"     # Uncomment for int8 comparison
+    # - "int4"     # Uncomment for int4 comparison
+
+# Paths
+paths:
+  data_dir: "data/"
+  model_cache: "models/"
+  results_dir: "benchmark_results/"
+  test_prompts: "data/test_prompts.json"
+
+# Hardware
+hardware:
+  use_gpu: true
+  gpu_device: 0
+  mixed_precision: true

@@ -55,33 +55,33 @@ class ModelConfig:
 
 # MODEL 1: FASTEST (Best for latency-sensitive apps)
 MISTRAL_7B = ModelConfig(
-    model_id="mistralai/Mistral-7B-Instruct-v0.1",
-    model_name="Mistral 7B",
-    size="7B",
-    model_type="mistral",
-    min_ram_gb=8,
-    min_gpu_memory_gb=2,
-    tokens_per_second_cpu=2,      # ~2 tokens/sec on CPU
-    tokens_per_second_gpu=50,     # ~50 tokens/sec on GPU
-    quality_score=0.75,           # Good quality for size
-    context_length=32768,
+    model_id="facebook/opt-1.3b",
+    model_name="OPT 1.3B",
+    size="1.3B",
+    model_type="opt",
+    min_ram_gb=4,
+    min_gpu_memory_gb=1,
+    tokens_per_second_cpu=5,      # ~5 tokens/sec on CPU
+    tokens_per_second_gpu=100,    # ~100 tokens/sec on GPU
+    quality_score=0.70,           # Decent quality
+    context_length=2048,
     supports_quantization=True,
-    description="Fastest, efficient model. Great for real-time apps.",
+    description="Fast, efficient model. Great for real-time apps.",
     best_for="Chatbots, quick responses, edge devices"
 )
 
 # MODEL 2: BALANCED (Best for most use cases)
 LLAMA2_13B = ModelConfig(
-    model_id="meta-llama/Llama-2-13b-chat-hf",
-    model_name="Llama 2 13B",
-    size="13B",
-    model_type="llama",
-    min_ram_gb=12,
-    min_gpu_memory_gb=4,
-    tokens_per_second_cpu=1,      # ~1 token/sec on CPU
-    tokens_per_second_gpu=30,     # ~30 tokens/sec on GPU
-    quality_score=0.82,           # Better quality
-    context_length=4096,
+    model_id="facebook/opt-2.7b",
+    model_name="OPT 2.7B",
+    size="2.7B",
+    model_type="opt",
+    min_ram_gb=6,
+    min_gpu_memory_gb=2,
+    tokens_per_second_cpu=3,      # ~3 tokens/sec on CPU
+    tokens_per_second_gpu=80,     # ~80 tokens/sec on GPU
+    quality_score=0.75,           # Better quality
+    context_length=2048,
     supports_quantization=True,
     description="Good balance of quality and speed.",
     best_for="General purpose, RAG systems, production apps"
@@ -89,15 +89,15 @@ LLAMA2_13B = ModelConfig(
 
 # MODEL 3: HIGHEST QUALITY (Best for accuracy)
 NEURAL_CHAT_34B = ModelConfig(
-    model_id="Intel/neural-chat-7b-v3-1",  # Using 7B version for practicality
-    model_name="Neural Chat 7B",
-    size="7B",
-    model_type="neural-chat",
-    min_ram_gb=8,
-    min_gpu_memory_gb=2,
+    model_id="facebook/opt-6.7b",
+    model_name="OPT 6.7B",
+    size="6.7B",
+    model_type="opt",
+    min_ram_gb=10,
+    min_gpu_memory_gb=3,
     tokens_per_second_cpu=2,
-    tokens_per_second_gpu=45,
-    quality_score=0.78,
+    tokens_per_second_gpu=60,
+    quality_score=0.80,
     context_length=32768,
     supports_quantization=True,
     description="Optimized for conversational quality.",
