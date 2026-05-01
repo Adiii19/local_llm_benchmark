@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-04-25T20:04:31.837524",
+  "device_info": {
+    "device": "cpu",
+    "gpu_available": false,
+    "gpu_name": null,
+    "gpu_memory_total": 0,
+    "gpu_memory_free": 0,
+    "cpu_cores": 16,
+    "cpu_percent": 4.2,
+    "ram_total": 15.710990905761719,
+    "ram_available": 1.2707023620605469,
+    "cuda_version": null,
+    "pytorch_version": "2.0.0+cpu"
+  },
+  "results": {}
+}
