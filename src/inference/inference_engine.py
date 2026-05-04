@@ -7,6 +7,7 @@ CORRECTED - Works on both GPU and CPU
 
 import torch
 import time
+import threading
 from typing import Dict, List, Tuple, Optional
 from transformers import AutoTokenizer
 import numpy as np
@@ -24,7 +25,8 @@ class InferenceConfig:
         top_p: float = 0.9,
         top_k: int = 50,
         repetition_penalty: float = 1.0,
-        use_cache: bool = True
+        use_cache: bool = True,
+        timeout_seconds: Optional[int] = None  # ← NEW: Timeout support
     ):
         self.max_new_tokens = max_new_tokens
         self.temperature = temperature
@@ -32,6 +34,7 @@ class InferenceConfig:
         self.top_k = top_k
         self.repetition_penalty = repetition_penalty
         self.use_cache = use_cache
+        self.timeout_seconds = timeout_seconds  # ← NEW: Timeout
 
 
 class InferenceEngine:
@@ -61,11 +64,18 @@ class InferenceEngine:
         Generate text from prompt
         Works on both CPU and GPU
         
-        ✅ CHANGE: Device-aware memory tracking
+        ✅ CHANGE: Device-aware memory tracking, CPU optimizations, progress logging
         """
         
         if config is None:
             config = InferenceConfig()
+        
+        # ✅ NEW: Adjust config for CPU if needed
+        if self.device == 'cpu':
+            # Reduce tokens for CPU to prevent very long runs
+            if config.max_new_tokens > 128:
+                print(f"     ℹ️  Reducing max_new_tokens from {config.max_new_tokens} to 128 for CPU")
+                config.max_new_tokens = 128
         
         # Prepare input
         inputs = tokenizer(
@@ -84,27 +94,40 @@ class InferenceEngine:
         else:
             memory_before = 0
         
-        # Generate
+        # Generate with progress tracking
         start_time = time.time()
         print(f"     ⚡ Starting generation: prompt_tokens={input_length}, max_new_tokens={config.max_new_tokens}")
+        if self.device == 'cpu':
+            print(f"     ℹ️  CPU mode: This may take 1-5 minutes for longer outputs. Do not interrupt.")
         
-        with torch.inference_mode():
-            output_ids = model.generate(
-                **inputs,
-                max_new_tokens=config.max_new_tokens,
-                max_length=input_length + config.max_new_tokens,
-                temperature=config.temperature,
-                top_p=config.top_p,
-                top_k=config.top_k,
-                repetition_penalty=config.repetition_penalty,
-                use_cache=config.use_cache,
-                do_sample=True,
-                early_stopping=True,
-                pad_token_id=tokenizer.eos_token_id
-            )
-        
-        elapsed_time = time.time() - start_time
-        print(f"     ✓ Generation completed in {elapsed_time:.1f}s")
+        try:
+            with torch.inference_mode():
+                output_ids = model.generate(
+                    **inputs,
+                    max_new_tokens=config.max_new_tokens,
+                    max_length=input_length + config.max_new_tokens,
+                    temperature=config.temperature,
+                    top_p=config.top_p,
+                    top_k=config.top_k,
+                    repetition_penalty=config.repetition_penalty,
+                    use_cache=config.use_cache,
+                    do_sample=True,
+                    early_stopping=True,
+                    pad_token_id=tokenizer.eos_token_id,
+                    min_length=10  # ← Ensure minimum output
+                )
+            
+            elapsed_time = time.time() - start_time
+            print(f"     ✓ Generation completed in {elapsed_time:.1f}s")
+            
+        except Exception as e:
+            elapsed_time = time.time() - start_time
+            print(f"     ✗ Generation failed after {elapsed_time:.1f}s: {str(e)[:100]}")
+            return "", {
+                'error': str(e),
+                'latency_seconds': elapsed_time,
+                'device': self.device
+            }
         
         # Decode
         generated_text = tokenizer.decode(

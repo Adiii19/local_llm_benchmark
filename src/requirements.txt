@@ -5,12 +5,15 @@ accelerate==0.24.0
 sentencepiece==0.1.99
 protobuf==3.20.0
 
-# For Llama2 (important!)
+# HuggingFace
 huggingface-hub==0.19.3
 
-# Inference
+# Quantization Support
 bitsandbytes==0.41.0
 peft==0.7.0
+
+# ✅ NEW: GGUF Support (optional but recommended)
+llama-cpp-python==0.2.0
 
 # Utils
 numpy==1.24.0

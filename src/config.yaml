@@ -3,7 +3,7 @@
 # Model settings
 models:
   - name: "Mistral 7B"
-    model_id: "mistralai/Mistral-7B-Instruct-v0.1"
+    model_id: "mistralai/Mistral-7B-Instruct-v0.3"
     enabled: true
   
   - name: "Llama 2 13B"

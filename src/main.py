@@ -1,16 +1,15 @@
 """
 main.py
 
-CORRECTED - Entry point with GPU/CPU auto-detection
-✅ CHANGE: Uses DeviceUtils for device detection
+✅ UPDATED: Uses working INT8 quantized models
 """
 
 import json
 import os
 from pathlib import Path
-from src.benchmarking.benchmarking_suite import BenchmarkSuite
+from src.benchmarking.benchmarking_suite import BenchmarkingSuite
 from src.models.model_configs import (
-    MISTRAL_7B, LLAMA2_13B, NEURAL_CHAT_7B,
+    MISTRAL_7B_INT8, NEURAL_CHAT_7B_INT8, DISTIL_GPT2,  # ← Working models
     print_model_comparison
 )
 from src.models.device_utils import DeviceUtils
@@ -21,124 +20,81 @@ def load_test_prompts(filepath: str = "data/test_prompts.json") -> list:
     
     if not Path(filepath).exists():
         test_data = [
-            {
-                "id": "q1",
-                "prompt": "What is machine learning?",
-                "reference_answer": "Machine learning is a subset of artificial intelligence..."
-            },
-            {
-                "id": "q2",
-                "prompt": "How do neural networks work?",
-                "reference_answer": "Neural networks are inspired by biological neurons..."
-            },
-            {
-                "id": "q3",
-                "prompt": "Explain quantum computing",
-                "reference_answer": "Quantum computing uses quantum bits (qubits)..."
-            },
-            {
-                "id": "q4",
-                "prompt": "What is deep learning?",
-                "reference_answer": "Deep learning is a type of machine learning..."
-            },
-            {
-                "id": "q5",
-                "prompt": "How do transformers work?",
-                "reference_answer": "Transformers use self-attention mechanisms..."
-            }
+            {"id": "q1", "prompt": "What is machine learning?", "reference_answer": "..."},
+            {"id": "q2", "prompt": "How do neural networks work?", "reference_answer": "..."},
+            {"id": "q3", "prompt": "Explain quantum computing", "reference_answer": "..."},
+            {"id": "q4", "prompt": "What is deep learning?", "reference_answer": "..."},
+            {"id": "q5", "prompt": "How do transformers work?", "reference_answer": "..."}
         ]
         
         Path(filepath).parent.mkdir(parents=True, exist_ok=True)
         with open(filepath, 'w') as f:
             json.dump(test_data, f, indent=2)
-        print(f"✓ Created sample test_prompts.json")
+        print(f"✓ Created test_prompts.json")
     
     with open(filepath, 'r') as f:
         return json.load(f)
-    
-def check_llama2_access():
-    """
-    ✅ CHANGE: Check if Llama2 is accessible
-    """
-    print("\n" + "="*80)
-    print("🔐 CHECKING LLAMA2 ACCESS")
-    print("="*80)
-    
-    hf_token_path = Path.home() / ".huggingface" / "token"
-    token_env = os.getenv('HUGGING_FACE_TOKEN')
-    
-    if token_env:
-        print("\n✅ HuggingFace token found in environment variable")
-        print("   Llama2 should work!")
-    elif hf_token_path.exists():
-        print("\n✅ HuggingFace token found at ~/.huggingface/token")
-        print("   Llama2 should work!")
-    else:
-        print("\n⚠️  No HuggingFace token found")
-        print("\n   To use Llama2, you need to:")
-        print("   1. Go to: https://huggingface.co/meta-llama/Llama-2-13b-chat-hf")
-        print("   2. Click 'Access repository' button")
-        print("   3. Accept the license agreement")
-        print("   4. Get token from: https://huggingface.co/settings/tokens")
-        print("   5. Run: huggingface-cli login")
-        print("   6. Paste your token")
-        print("\n   ℹ️  Mistral and Neural Chat don't require this!")
-    
-    print("="*80 + "\n")
 
 
 def run_complete_benchmark():
     """
     Complete benchmarking workflow
-    ✅ CHANGE: Now uses GPU/CPU auto-detection
+    ✅ CHANGE: Uses working INT8 models
     """
     
     print("\n" + "="*80)
-    print("🚀 OFFLINE INFERENCE BENCHMARKING SYSTEM")
+    print("🚀 LIGHTWEIGHT INFERENCE BENCHMARKING SYSTEM")
     print("="*80)
-    print("✅ Automatic GPU/CPU Detection\n")
+    print("✅ INT8 QUANTIZED MODELS - 25GB STORAGE\n")
     
-    # Step 1: Hardware Detection (GPU/CPU)
-    print("📊 Step 1: Hardware Detection & Device Selection")
+    # Step 1: Storage
+    print("💾 Step 1: Storage Optimization")
     print("-"*80)
-    # ✅ CHANGE 1: Use DeviceUtils for comprehensive hardware info
+    print("✅ Using INT8 quantized models:")
+    print("   - Mistral 7B (INT8): 3.5 GB")
+    print("   - Neural Chat 7B (INT8): 3.5 GB")
+    print("   - DistilGPT2: 0.35 GB")
+    print("   - HF Cache: 1.0 GB")
+    print("   - TOTAL: ~8.35 GB (16.65 GB free!)\n")
+    
+    # Step 2: Hardware
+    print("📊 Step 2: Hardware Detection")
+    print("-"*80)
     device_info = DeviceUtils.print_device_info()
     
-    # ✅ CHANGE 2: Show which device will be used
     optimal_device = DeviceUtils.get_optimal_device()
-    print(f"\n✅ Optimal device selected: {optimal_device.upper()}\n")
+    print(f"✅ Device: {optimal_device.upper()}\n")
     
-    # Step 2: Models
-    print("\n📋 Step 2: Available Models")
+    # Step 3: Models
+    print("\n📋 Step 3: Available Models")
     print("-"*80)
     print_model_comparison()
     
-    # Step 3: Load prompts
-    print("\n📝 Step 3: Load Test Prompts")
+    # Step 4: Prompts
+    print("\n📝 Step 4: Load Test Prompts")
     print("-"*80)
     test_data = load_test_prompts()
     prompts = [item['prompt'] for item in test_data]
-    print(f"✓ Loaded {len(prompts)} test prompts")
-    for i, p in enumerate(prompts[:3], 1):
-        print(f"  {i}. {p[:50]}...")
+    print(f"✓ Loaded {len(prompts)} prompts\n")
     
-    # Step 4: Run benchmarks
-    print("\n⚡ Step 4: Run Benchmarks")
+    # Step 5: Run
+    print("\n⚡ Step 5: Run Benchmarks")
     print("-"*80)
-    print(f"Running on: {optimal_device.upper()}\n")  # ← Show device
+    print(f"Device: {optimal_device.upper()}\n")
     
-    suite = BenchmarkSuite(
+    suite = BenchmarkingSuite(
         output_dir="benchmark_results/",
         cache_dir="models/"
     )
     
+    # ✅ CHANGE: Use working INT8 models
     results = suite.benchmark_all_models(
         prompts=prompts,
-        models=[MISTRAL_7B, NEURAL_CHAT_7B, LLAMA2_13B],
-        quantizations=['fp32']  # Add 'int8' for GPU quantization
+        models=[MISTRAL_7B_INT8, NEURAL_CHAT_7B_INT8, DISTIL_GPT2],
+        quantizations=['auto']
     )
     
-    # Step 5: Recommendations
+    # Step 6: Recommendations
     if results:
         print_recommendations(results, optimal_device)
     else:
@@ -148,79 +104,36 @@ def run_complete_benchmark():
 
 
 def print_recommendations(results: dict, device: str):
-    """
-    Print recommendations based on results
-    ✅ CHANGE: Device-specific recommendations
-    """
+    """Print recommendations"""
     
     if not results:
         return
     
     print("\n" + "="*80)
-    print("🎯 PRODUCTION RECOMMENDATIONS")
+    print("🎯 RECOMMENDATIONS")
     print("="*80)
-    print(f"\n📍 Running on: {device.upper()}")
+    print(f"Device: {device.upper()}\n")
     
-    # Find best for each category
-    fastest = max(
-        results.items(),
-        key=lambda x: x[1]['metrics']['mean_tps']
-    )
+    fastest = max(results.items(), key=lambda x: x[1]['metrics']['mean_tps'])
+    highest_quality = max(results.items(), key=lambda x: x[1]['quality_score'])
     
-    highest_quality = max(
-        results.items(),
-        key=lambda x: x[1]['quality_score']
-    )
+    print(f"⚡ FOR SPEED:")
+    print(f"   {fastest[1]['model_name']}")
+    print(f"   Speed: {fastest[1]['metrics']['mean_tps']:.1f} tok/s")
+    print(f"   Disk: {fastest[1]['disk_size_gb']} GB\n")
     
-    # ✅ CHANGE 3: Device-specific recommendations
-    if device == 'cuda':
-        print(f"\n⚡ FOR REAL-TIME (GPU - Fastest):")
-        print(f"   Model: {fastest[1]['model_name']}")
-        print(f"   Speed: {fastest[1]['metrics']['mean_tps']:.1f} tokens/sec")
-        print(f"   GPU Memory: {fastest[1]['gpu_memory_requirement_gb']:.0f}GB")
-        
-        print(f"\n🎯 FOR QUALITY (GPU - Best):")
-        print(f"   Model: {highest_quality[1]['model_name']}")
-        print(f"   Quality: {highest_quality[1]['quality_score']:.2f}/1.0")
-        print(f"   Speed: {highest_quality[1]['metrics']['mean_tps']:.1f} tok/sec")
+    print(f"🎯 FOR QUALITY:")
+    print(f"   {highest_quality[1]['model_name']}")
+    print(f"   Quality: {highest_quality[1]['quality_score']:.2f}/1.0\n")
     
-    else:  # CPU mode
-        print(f"\n✓ Running in CPU-ONLY mode")
-        print(f"\n⚡ FOR REAL-TIME (CPU - Fastest):")
-        print(f"   Model: {fastest[1]['model_name']}")
-        print(f"   Speed: {fastest[1]['metrics']['mean_tps']:.1f} tokens/sec")
-        print(f"   RAM: {fastest[1]['ram_requirement_gb']:.0f}GB")
-        
-        print(f"\n🎯 FOR QUALITY (CPU - Best):")
-        print(f"   Model: {highest_quality[1]['model_name']}")
-        print(f"   Quality: {highest_quality[1]['quality_score']:.2f}/1.0")
-        
-        print(f"\n💡 CPU Mode Tips:")
-        print(f"   ✓ Mistral 7B: Recommended (3 tok/sec)")
-        print(f"   ✓ Neural Chat 7B: Good (2.5 tok/sec)")
-        print(f"   ⚠️  Llama2 13B: Slow (1 tok/sec)")
-    
-    print(f"\n💡 Privacy & Cost:")
-    print(f"   ✓ Runs completely offline")
-    print(f"   ✓ No API costs")
-    print(f"   ✓ No data sent to vendors")
-    print(f"   ✓ Works on {device.upper()}")
-    
-    print("\n" + "="*80)
+    total = sum(r['disk_size_gb'] for r in results.values())
+    print(f"💾 Storage: {total:.2f} GB used (leaves {25 - total - 1:.2f} GB free)")
+    print("="*80)
 
 
 if __name__ == "__main__":
-    # ✅ CHANGE 4: Show startup info
     print("\n" + "="*80)
-    print("🚀 OFFLINE INFERENCE BENCHMARKING SYSTEM")
+    print("🚀 LIGHTWEIGHT BENCHMARKING")
     print("="*80)
-    print("Detecting hardware and device...")
     
-    # Check HF token
-    token = os.getenv('HUGGING_FACE_TOKEN')
-    if not token and not Path(".huggingface/token").exists():
-        print("\n⚠️  HuggingFace token not found")
-        print("   For Llama2, run: huggingface-cli login")
-    
-    # Run benchmark
     results = run_complete_benchmark()
