@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-05-03T14:03:21.833651",
+  "device_info": null,
+  "results": {},
+  "failed_models": [
+    {
+      "model": "Mistral 7B",
+      "reason": "Failed to load"
+    },
+    {
+      "model": "Neural Chat 7B",
+      "reason": "Failed to load"
+    },
+    {
+      "model": "Llama 2 13B",
+      "reason": "Failed to load"
+    }
+  ],
+  "summary": {
+    "total_models_attempted": 3,
+    "successful": 0,
+    "failed": 3
+  }
+}

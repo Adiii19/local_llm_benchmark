@@ -10,7 +10,7 @@ class DeviceUtils:
             info={
                   
                 'device':'cpu',
-                'gpu_avaiable':False,
+                'gpu_available':False,
                 'gpu_memory_total':0,
                 'gpu_memory_free':0,
                 'cpu_cores':psutil.cpu_count(),
@@ -24,8 +24,8 @@ class DeviceUtils:
 
             if torch.cuda.is_available(): #cuda lets us use gpu for non graphic task like deep learning
                   info['device']='cuda'
-                  info['gpu_avaiable']=True
-                  info['gpu_avaiable']=torch.cuda.get_device_name(0)
+                  info['gpu_available']=True
+                  info['gpu_name']=torch.cuda.get_device_name(0)
                   info['gpu_memory_total']=torch.cuda.get_device_properties(0).total_memory/(1024**3)
                   info['gpu_memory_free']=torch.cuda.mem_get_info()[0]/(1024**3)
                   info['cuda_version']=torch.version.cuda

@@ -35,7 +35,7 @@ class ModelConfig:
 
 MISTRAL_7B=ModelConfig(
 
-    model_id="mistral/Mistral-7B-Instruct-vO.1",
+    model_id="mistral/Mistral-7B-Instruct-v0.2",
     model_name="Mistral 7B",
     size="7B",
     model_type="mistral",
@@ -70,8 +70,8 @@ LLAMA2_13B=ModelConfig(
 
 )
 
-NEURAL_CHAT_34B = ModelConfig(
-    model_id="Intel/neural-chat-7b-v3-1",  # Using 7B version for practicality
+NEURAL_CHAT_7B = ModelConfig(
+    model_id="Intel/neural-chat-7b-v3-3",  # Using 7B version for practicality
     model_name="Neural Chat 7B",
     size="7B",
     model_type="neural-chat",
@@ -87,10 +87,10 @@ NEURAL_CHAT_34B = ModelConfig(
 )
 
 @dataclass
-class QuantizationCongfig:
+class QuantizationConfig:
     method:str
-    bits=int
-    reduction_ratio=float
+    bits:int
+    reduction_ratio:float
     speed_improvement:float
     quality_loss:float
 
@@ -99,14 +99,14 @@ class QuantizationCongfig:
     
 QUANTIZATION_OPTIONS={
 
-      'fp_32':QuantizationCongfig(
+      'fp_32':QuantizationConfig(
         method='fp32',
         bits=32,
         reduction_ratio=1.0,
         speed_improvement=1.0,
         quality_loss=0.0
     ),
-    'fp16':QuantizationCongfig(
+    'fp16':QuantizationConfig(
         method='fp16',
         bits=16,
         reduction_ratio=0.5,
@@ -114,14 +114,14 @@ QUANTIZATION_OPTIONS={
         quality_loss=0.02
     ),
 
-   'int8': QuantizationCongfig(
+   'int8': QuantizationConfig(
         method='int8',
         bits=8,
         reduction_ratio=0.25,
         speed_improvement=2.0,
         quality_loss=0.05
     ),
-    'int4': QuantizationCongfig(
+    'int4': QuantizationConfig(
         method='int4',
         bits=4,
         reduction_ratio=0.125,
@@ -130,10 +130,10 @@ QUANTIZATION_OPTIONS={
     )
 
 }
-models=[MISTRAL_7B,LLAMA2_13B,NEURAL_CHAT_34B]
+models=[MISTRAL_7B,LLAMA2_13B,NEURAL_CHAT_7B]
 
 def print_model_comparison():
-    models=[MISTRAL_7B,LLAMA2_13B,NEURAL_CHAT_34B]
+    models=[MISTRAL_7B,LLAMA2_13B,NEURAL_CHAT_7B]
 
     print("=" * 100)
     print("📊 MODEL COMPARISON")
