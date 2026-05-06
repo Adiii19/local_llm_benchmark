@@ -1,9 +1,3 @@
-"""
-src/inference/inference_engine.py
-
-Inference engine for CPU and GPU
-"""
-
 import torch
 import time
 from typing import Dict, List, Tuple
@@ -34,9 +28,7 @@ class InferenceConfig:
 
 
 class InferenceEngine:
-    """
-    Inference engine for CPU and GPU
-    """
+
     
     def __init__(self, device: str = None):
         if device is None:
@@ -54,10 +46,7 @@ class InferenceEngine:
         prompt: str,
         config: InferenceConfig = None
     ) -> Tuple[str, Dict]:
-        """
-        Generate text from prompt
-        Works on both CPU and GPU
-        """
+       
         
         if config is None:
             config = InferenceConfig()
@@ -134,9 +123,7 @@ class InferenceEngine:
         prompts: List[str],
         config: InferenceConfig = None
     ) -> Tuple[List[str], List[Dict]]:
-        """
-        Generate for multiple prompts
-        """
+        
         generated_texts = []
         all_metrics = []
         
@@ -153,9 +140,7 @@ class InferenceEngine:
     
     @staticmethod
     def aggregate_metrics(metrics_list: List[Dict]) -> Dict:
-        """
-        Aggregate metrics from multiple runs
-        """
+       
         if not metrics_list:
             return {}
         

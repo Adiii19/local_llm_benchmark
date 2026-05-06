@@ -1,13 +1,8 @@
-"""
-main.py
-
-Entry point for 1B model benchmarking
-"""
 
 import json
 from pathlib import Path
 from src.benchmarking.benchmarking_suite import BenchmarkSuite
-from src.models.model_configs import TINYLLAMA_1B, DISTILGPT2, OPENCHAT_3B, print_model_comparison
+from src.models.model_configs import TINYLLAMA_1B, DISTILGPT2,  print_model_comparison
 from src.models.device_utils import DeviceUtils
 
 
@@ -40,7 +35,6 @@ def run_complete_benchmark():
     print("="*80)
     print("✅ Optimized for 15.7GB RAM & 25GB Storage\n")
     
-    # Step 1: Storage
     print("💾 Step 1: Storage Check")
     print("-"*80)
     print("✅ Using 1B models:")
@@ -50,24 +44,21 @@ def run_complete_benchmark():
     print("   - HF Cache: 1.0 GB")
     print("   - TOTAL: ~6.15 GB ✅ (18.85 GB free!)\n")
     
-    # Step 2: Hardware
     print("📊 Step 2: System Detection")
     print("-"*80)
     device_info = DeviceUtils.print_device_info()
     
-    # Step 3: Models
     print("📋 Step 3: Available Models")
     print("-"*80)
     print_model_comparison()
     
-    # Step 4: Prompts
+    
     print("📝 Step 4: Load Test Prompts")
     print("-"*80)
     test_data = load_test_prompts()
     prompts = [item['prompt'] for item in test_data]
     print(f"✓ Loaded {len(prompts)} prompts\n")
     
-    # Step 5: Run
     print("⚡ Step 5: Run Benchmarks")
     print("-"*80)
     
@@ -78,11 +69,10 @@ def run_complete_benchmark():
     
     results = suite.benchmark_all_models(
         prompts=prompts,
-        models=[TINYLLAMA_1B, DISTILGPT2, OPENCHAT_3B],
+        models=[TINYLLAMA_1B, DISTILGPT2],
         quantizations=['none']
     )
     
-    # Step 6: Recommendations
     if results:
         print_recommendations(results)
     else:
@@ -92,7 +82,6 @@ def run_complete_benchmark():
 
 
 def print_recommendations(results: dict):
-    """Print recommendations"""
     
     if not results:
         return

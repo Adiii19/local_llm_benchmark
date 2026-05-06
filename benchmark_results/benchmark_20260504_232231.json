@@ -1,0 +1,59 @@
+{
+  "timestamp": "2026-05-04T23:22:31.639512",
+  "results": {
+    "TinyLlama-1.1B": {
+      "model_name": "TinyLlama-1.1B",
+      "model_id": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+      "model_size": "1.1B",
+      "disk_size_gb": 2.2,
+      "ram_requirement_gb": 3,
+      "quality_score": 0.68,
+      "metrics": {
+        "mean_latency": 9.718906831741332,
+        "median_latency": 0.29363036155700684,
+        "std_latency": 11.555912648000923,
+        "min_latency": 0.2886815071105957,
+        "max_latency": 24.573415279388428,
+        "mean_tps": 4.211644893060759,
+        "median_tps": 3.464025146636406,
+        "std_tps": 0.9507078870830636,
+        "min_tps": 3.405642368511865,
+        "max_tps": 5.529402514709533,
+        "device": "cpu",
+        "num_runs": 5
+      },
+      "device_used": "cpu",
+      "benchmark_date": "2026-05-04T23:22:09.153165"
+    },
+    "DistilGPT2": {
+      "model_name": "DistilGPT2",
+      "model_id": "distilgpt2",
+      "model_size": "82M",
+      "disk_size_gb": 0.35,
+      "ram_requirement_gb": 1,
+      "quality_score": 0.55,
+      "metrics": {
+        "mean_latency": 4.0562214851379395,
+        "median_latency": 3.9638688564300537,
+        "std_latency": 0.31783674452814403,
+        "min_latency": 3.728379964828491,
+        "max_latency": 4.660920858383179,
+        "mean_tps": 31.736049133016685,
+        "median_tps": 32.29168386647372,
+        "std_tps": 2.296255271076334,
+        "min_tps": 27.462384341879122,
+        "max_tps": 34.33126484089132,
+        "device": "cpu",
+        "num_runs": 5
+      },
+      "device_used": "cpu",
+      "benchmark_date": "2026-05-04T23:22:31.399277"
+    }
+  },
+  "failed_models": [],
+  "summary": {
+    "successful": 2,
+    "failed": 0,
+    "total_disk_used_gb": 2.5500000000000003
+  }
+}

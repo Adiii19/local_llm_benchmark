@@ -1,24 +1,18 @@
-"""
-src/benchmarking/benchmark_suite.py
 
-Benchmarking framework for 1B models
-"""
 
 import json
 from typing import List, Dict, Optional
 from pathlib import Path
 from datetime import datetime
 
-from ..models.model_configs import TINYLLAMA_1B, DISTILGPT2, OPENCHAT_3B
+from ..models.model_configs import TINYLLAMA_1B, DISTILGPT2
 from ..models.model_manager import ModelManager
 from ..inference.inference_engine import InferenceEngine
 from ..models.device_utils import DeviceUtils
 
 
 class BenchmarkSuite:
-    """
-    Benchmarking for 1B models
-    """
+   
     
     def __init__(self, output_dir: str = "benchmark_results/", cache_dir: str = "models/"):
         self.output_dir = Path(output_dir)
@@ -50,7 +44,6 @@ class BenchmarkSuite:
         print(f"RAM: {config.min_ram_gb} GB")
         print(f"Prompts: {len(prompts)}")
         
-        # Load model
         model_result = self.model_manager.load_model(config)
         
         if model_result is None:
@@ -65,7 +58,6 @@ class BenchmarkSuite:
             self.failed_models.append({'model': config.model_name, 'reason': 'Unpack error'})
             return None
         
-        # Run benchmarks
         try:
             all_metrics = []
             
@@ -76,7 +68,6 @@ class BenchmarkSuite:
                 _, metrics_list = self.inference_engine.batch_generate(model, tokenizer, prompts)
                 all_metrics.extend(metrics_list)
             
-            # Aggregate
             aggregated = self.inference_engine.aggregate_metrics(all_metrics)
             
             result = {
@@ -201,7 +192,6 @@ class BenchmarkSuite:
         print(f"   Free: {25 - total - 1:.2f} GB")
     
     def save_results(self):
-        """Save results"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = self.output_dir / f"benchmark_{timestamp}.json"
         

@@ -1,9 +1,3 @@
-"""
-src/models/model_manager.py
-
-Model manager with memory optimization for 1B models
-"""
-
 import torch
 from transformers import (
     AutoModelForCausalLM,
@@ -15,15 +9,13 @@ from pathlib import Path
 import traceback
 import os
 from huggingface_hub import login as hf_login
+import warnings
 
 from .device_utils import DeviceUtils
 
 
 class ModelManager:
-    """
-    Simple model manager for 1B models
-    Optimized for low memory systems
-    """
+    
     
     def __init__(self, cache_dir: str = "models/"):
         self.cache_dir = cache_dir
@@ -37,10 +29,9 @@ class ModelManager:
         print(f"✓ ModelManager initialized")
         print(f"  Device: {self.device.upper()}")
         print(f"  Cache: {self.cache_dir}")
-        print(f"  ✅ Optimized for 1B models")
+        print(f"  ✅ Memory Optimization: AGGRESSIVE")
     
     def _setup_hf_authentication(self):
-        """Setup HuggingFace authentication"""
         try:
             token = os.getenv('HUGGING_FACE_TOKEN')
             
@@ -61,11 +52,7 @@ class ModelManager:
         quantization: Optional[str] = None,
         force_reload: bool = False
     ) -> Optional[Tuple[torch.nn.Module, AutoTokenizer]]:
-        """
-        Load 1B model with memory optimization
-        ✅ OPTIMIZED FOR LOW MEMORY SYSTEMS
-        """
-        
+       
         model_id = config.model_id
         
         # Check cache
@@ -84,25 +71,28 @@ class ModelManager:
         print(f"   Device: {self.device.upper()}")
         print(f"{'='*70}")
         
-        # ✅ AGGRESSIVE CLEANUP BEFORE LOADING
-        self._cleanup_memory()
+        print(f"\n  📍 Step 0: Memory cleanup...")
+        self._aggressive_cleanup()
         
         # ✅ CHECK AVAILABLE MEMORY
         memory = DeviceUtils.get_memory_usage()
         available_ram = memory['ram_available_gb']
-        needed_ram = config.min_ram_gb + 1  # +1GB buffer
+        needed_ram = config.min_ram_gb + 2  # +2GB safety buffer
+        
+        print(f"     Available RAM: {available_ram:.1f} GB")
+        print(f"     Needed: {needed_ram:.1f} GB")
         
         if available_ram < needed_ram:
             print(f"\n❌ INSUFFICIENT MEMORY")
-            print(f"   Available: {available_ram:.1f} GB")
-            print(f"   Needed: {needed_ram:.1f} GB")
-            print(f"   💡 Close other programs and try again")
+            print(f"   💡 SOLUTIONS:")
+            print(f"      1. Close Chrome, VS Code, Discord")
+            print(f"      2. Restart your PC")
+            print(f"      3. Only run this script with nothing else")
             return None
         
-        print(f"  ✓ Memory check passed ({available_ram:.1f}GB available)")
+        print(f"  ✓ Memory check passed")
         
         try:
-            # Step 1: Load tokenizer
             print(f"\n  📍 Step 1: Loading tokenizer...")
             tokenizer = self._load_tokenizer(model_id)
             
@@ -111,32 +101,42 @@ class ModelManager:
             
             print(f"     ✓ Tokenizer loaded")
             
-            # Step 2: Build load kwargs
-            print(f"  📍 Step 2: Configuring model loading...")
-            load_kwargs = self._get_load_kwargs()
+            self._aggressive_cleanup()
             
-            # Step 3: Load model
-            print(f"  📍 Step 3: Loading model (this may take 1-2 minutes)...")
+            print(f"\n  📍 Step 2: Configuring model loading...")
+            load_kwargs = self._get_load_kwargs_aggressive()
             
-            model = AutoModelForCausalLM.from_pretrained(
-                model_id,
-                **load_kwargs
-            )
+            print(f"\n  📍 Step 3: Loading model...")
+            print(f"     (This will take 1-2 minutes, please be patient...)")
+            
+            # ✅ Suppress the deprecation warning
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=FutureWarning)
+                
+                model = AutoModelForCausalLM.from_pretrained(
+                    model_id,
+                    **load_kwargs
+                )
             
             if model is None:
                 raise ValueError(f"Failed to load model for {model_id}")
             
-            print(f"     ✓ Model loaded")
+            print(f"     ✓ Model loaded successfully!")
             
             # Set to eval mode
             model.eval()
             
-            # Move to device
+            # ✅ Move to device carefully
             try:
+                print(f"     Moving to {self.device.upper()}...")
                 model = model.to(self.device)
                 print(f"     ✓ Moved to {self.device.upper()}")
-            except Exception as e:
-                print(f"     ⚠️  Warning: {str(e)[:50]}")
+            except RuntimeError as e:
+                if "out of memory" in str(e).lower():
+                    print(f"\n❌ OUT OF MEMORY while moving model")
+                    print(f"   Try: DistilGPT2 (82M) instead")
+                    return None
+                raise
             
             # Set padding token
             if tokenizer.pad_token is None:
@@ -152,37 +152,70 @@ class ModelManager:
             
             return (model, tokenizer)
         
+        except RuntimeError as e:
+            error_msg = str(e).lower()
+            
+            if "out of memory" in error_msg:
+                print(f"\n❌ OUT OF MEMORY")
+                print(f"   Your system doesn't have enough RAM")
+                print(f"   Try:")
+                print(f"   1. Restart your PC")
+                print(f"   2. Use DistilGPT2 instead (smallest model)")
+                print(f"   3. Close all other programs")
+            else:
+                print(f"\n❌ RUNTIME ERROR: {str(e)[:150]}")
+            
+            self.loaded_models[model_id] = None
+            return None
+        
         except Exception as e:
-            print(f"\n  ❌ FAILED to load {config.model_name}")
-            print(f"\n  Error: {str(e)[:150]}")
+            print(f"\n❌ FAILED to load {config.model_name}")
+            print(f"  Error: {str(e)[:150]}")
             
             self._print_troubleshooting(model_id, str(e))
             
             self.loaded_models[model_id] = None
             return None
     
-    def _get_load_kwargs(self) -> dict:
-   
-      kwargs = {
-        'cache_dir': self.cache_dir,
-        'trust_remote_code': True,
-        # ✅ CRITICAL: Sequential loading of model shards
-        'low_cpu_mem_usage': True,
-    }
+    def _get_load_kwargs_aggressive(self) -> dict:
+       
+        kwargs = {
+            'cache_dir': self.cache_dir,
+            'trust_remote_code': True,
+        }
+        
+        if self.device == 'cuda':
+            print(f"     ⚙️  GPU Configuration (8-bit Quantized)...")
+            kwargs['device_map'] = 'auto'
+            kwargs['torch_dtype'] = torch.float16
+            kwargs['load_in_8bit'] = True
+            print(f"     Applying 8-bit quantization (saves 75% memory)")
+        
+        else:
+            print(f"     ⚙️  CPU Configuration (Memory Optimized)...")
+            kwargs['device_map'] = None
+            # ✅ KEY: Sequential loading doesn't load entire model at once
+            kwargs['low_cpu_mem_usage'] = True
+            kwargs['torch_dtype'] = torch.float32
+            print(f"     Using sequential loading (low_cpu_mem_usage)")
+            # ❌ NO quantization on CPU
+        
+        return kwargs
     
-      if self.device == 'cuda':
-        print(f"     ⚙️  GPU Configuration...")
-        kwargs['device_map'] = 'auto'
-        # ✅ Use float16 on GPU (supported)
-        kwargs['torch_dtype'] = torch.float16
-    
-      else:
-        print(f"     ⚙️  CPU Configuration (Memory Optimized)...")
-        kwargs['device_map'] = None
-        # ✅ FIX: Use float32 on CPU (float16 not supported!)
-        kwargs['torch_dtype'] = torch.float32
-    
-      return kwargs
+    def _aggressive_cleanup(self):
+      
+        # Force garbage collection multiple times
+        for _ in range(3):
+            gc.collect()
+        
+        # Clear PyTorch cache
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.reset_peak_memory_stats()
+        
+        # Print memory after cleanup
+        memory = DeviceUtils.get_memory_usage()
+        print(f"     RAM available after cleanup: {memory['ram_available_gb']:.1f} GB")
     
     def _load_tokenizer(self, model_id: str) -> Optional[AutoTokenizer]:
         """Load tokenizer with fallbacks"""
@@ -190,72 +223,64 @@ class ModelManager:
         print(f"     Attempting to load tokenizer...")
         
         try:
-            tokenizer = AutoTokenizer.from_pretrained(
-                model_id,
-                cache_dir=self.cache_dir,
-                trust_remote_code=True,
-                use_auth_token=True
-            )
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=FutureWarning)
+                
+                tokenizer = AutoTokenizer.from_pretrained(
+                    model_id,
+                    cache_dir=self.cache_dir,
+                    trust_remote_code=True,
+                    use_auth_token=True
+                )
             return tokenizer
         
         except Exception as e1:
             try:
-                tokenizer = AutoTokenizer.from_pretrained(
-                    model_id,
-                    cache_dir=self.cache_dir,
-                    trust_remote_code=True
-                )
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", category=FutureWarning)
+                    
+                    tokenizer = AutoTokenizer.from_pretrained(
+                        model_id,
+                        cache_dir=self.cache_dir,
+                        trust_remote_code=True
+                    )
                 return tokenizer
             
             except Exception as e2:
                 print(f"     ❌ Failed to load tokenizer")
+                print(f"     Error: {str(e2)[:100]}")
                 return None
     
     def _print_troubleshooting(self, model_id: str, error_str: str):
-        """Print troubleshooting guide"""
         
         error_lower = error_str.lower()
         
-        if "out of memory" in error_lower or "oom" in error_lower:
+        if "quantiz" in error_lower:
+            print(f"  ℹ️  Quantization Error (GPU needed for 8-bit)")
+            print(f"      Using CPU mode - no quantization available")
+        
+        elif "out of memory" in error_lower:
             print(f"  ℹ️  OUT OF MEMORY ERROR")
-            print(f"      1. Close all other programs")
-            print(f"      2. Restart your computer")
-            print(f"      3. Run only this script")
-            print(f"      4. Check RAM: taskmgr → Performance → Memory")
+            print(f"      This model is too large for your RAM")
+            print(f"      Try DistilGPT2 (82M) instead")
         
         elif "401" in error_lower or "unauthorized" in error_lower:
             print(f"  ℹ️  Authentication Error")
             print(f"      Run: huggingface-cli login")
         
-        elif "tokenizer" in error_lower:
-            print(f"  ℹ️  Tokenizer Error")
-            print(f"      Check internet connection")
-            print(f"      Update: pip install --upgrade transformers")
-        
         else:
-            print(f"  ℹ️  General Error")
-            print(f"      Update: pip install --upgrade torch transformers")
+            print(f"  ℹ️  Try these steps:")
+            print(f"      1. Restart your PC")
+            print(f"      2. Use smaller model (DistilGPT2)")
+            print(f"      3. Update: pip install --upgrade torch transformers")
     
     def unload_model(self, model_id: str):
-        """Unload a model"""
         if model_id in self.loaded_models:
             del self.loaded_models[model_id]
-            self._cleanup_memory()
+            self._aggressive_cleanup()
             print(f"✓ Unloaded: {model_id}")
     
     def unload_all_models(self):
-        """Unload all models"""
         self.loaded_models.clear()
-        self._cleanup_memory()
-        print(f"✓ All models unloaded")
-    
-    def _cleanup_memory(self):
-        """
-        Aggressive memory cleanup
-        ✅ CRITICAL FOR 1B MODELS ON LOW MEMORY
-        """
-        gc.collect()
-        
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            torch.cuda.reset_peak_memory_stats()
+        self._aggressive_cleanup()
+        print(f"✓ All models unloaded and memory cleared")

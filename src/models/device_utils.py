@@ -1,25 +1,14 @@
-"""
-src/models/device_utils.py
-
-GPU/CPU detection with memory info
-"""
-
 import torch
 import psutil
 from typing import Dict
 
 
 class DeviceUtils:
-    """
-    Hardware utilities with automatic GPU/CPU detection
-    """
+  
     
     @staticmethod
     def get_device_info() -> Dict:
-        """
-        Get complete hardware information
-        Automatically detects GPU, falls back to CPU
-        """
+        
         
         info = {
             'device': 'cpu',
@@ -56,38 +45,32 @@ class DeviceUtils:
     
     @staticmethod
     def print_device_info() -> Dict:
-        """
-        Print device information in readable format
-        Shows both GPU and CPU info
-        """
+        
         info = DeviceUtils.get_device_info()
         
         print("=" * 80)
         print("💻 SYSTEM INFORMATION & DEVICE DETECTION")
         print("=" * 80)
         
-        # Device selection
         print(f"\n🎯 DEVICE SELECTION:")
         if info['gpu_available']:
             print(f"   ✅ GPU DETECTED - Will use: {info['gpu_name']}")
         else:
             print(f"   ℹ️  No GPU found - Will use: CPU")
         
-        # CPU Info
         print(f"\n🖥️  CPU:")
         print(f"   Physical Cores: {info['cpu_cores']}")
         print(f"   Logical Cores (Threads): {info['cpu_threads']}")
         print(f"   Frequency: {info['cpu_freq']:.1f} MHz")
         print(f"   Current Usage: {info['cpu_percent']:.1f}%")
         
-        # RAM Info
+
         print(f"\n💾 RAM (System Memory):")
         print(f"   Total: {info['ram_total_gb']:.1f} GB")
         print(f"   Used: {info['ram_used_gb']:.1f} GB")
         print(f"   Available: {info['ram_available_gb']:.1f} GB")
         print(f"   Usage: {info['ram_percent']:.1f}%")
         
-        # GPU Info (if available)
         if info['gpu_available']:
             print(f"\n🎮 GPU (NVIDIA CUDA):")
             print(f"   Device Name: {info['gpu_name']}")
@@ -100,11 +83,10 @@ class DeviceUtils:
             print(f"   Status: NOT AVAILABLE")
             print(f"   Note: 1B models work great on CPU!")
         
-        # Framework Info
+        
         print(f"\n📦 Framework:")
         print(f"   PyTorch: {info['pytorch_version']}")
         
-        # Recommendations
         print(f"\n✅ RECOMMENDATIONS FOR 1B MODELS:")
         if info['ram_available_gb'] >= 2:
             print(f"   ✓ You have {info['ram_available_gb']:.1f}GB free RAM")
@@ -119,10 +101,7 @@ class DeviceUtils:
     
     @staticmethod
     def get_optimal_device() -> str:
-        """
-        Get optimal device for inference
-        Returns 'cuda' if GPU available and working, else 'cpu'
-        """
+       
         if torch.cuda.is_available():
             try:
                 test_tensor = torch.tensor([1.0]).cuda()
@@ -136,10 +115,7 @@ class DeviceUtils:
     
     @staticmethod
     def get_memory_usage() -> Dict:
-        """
-        Get current memory usage
-        Shows both CPU and GPU memory
-        """
+        
         memory = {
             'ram_used_gb': (psutil.virtual_memory().used) / (1024**3),
             'ram_available_gb': (psutil.virtual_memory().available) / (1024**3),
@@ -162,9 +138,7 @@ class DeviceUtils:
     
     @staticmethod
     def clear_gpu_memory():
-        """
-        Clear GPU cache (safe even if no GPU)
-        """
+       
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
             torch.cuda.reset_peak_memory_stats()
@@ -174,9 +148,7 @@ class DeviceUtils:
     
     @staticmethod
     def print_memory_usage():
-        """
-        Print current memory usage
-        """
+        
         memory = DeviceUtils.get_memory_usage()
         
         print("\n" + "="*70)
