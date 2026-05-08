@@ -3,7 +3,7 @@
 ---
 
 ```markdown
-### **Local LLM Benchmarking System**
+𝐋𝐨𝐜𝐚𝐥 𝐋𝐋𝐌 𝐁𝐞𝐧𝐜𝐡𝐦𝐚𝐫𝐤𝐢𝐧𝐠 𝐒𝐲𝐬𝐭𝐞𝐦
 
 A comprehensive **performance benchmarking and evaluation framework** for running language models (1B models) on resource-constrained systems. Designed for CPU/GPU optimization with memory efficiency and detailed quality metrics.
 
