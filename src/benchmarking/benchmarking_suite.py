@@ -9,6 +9,7 @@ from ..models.model_configs import TINYLLAMA_1B, DISTILGPT2
 from ..models.model_manager import ModelManager
 from ..inference.inference_engine import InferenceEngine
 from ..models.device_utils import DeviceUtils
+from ..evaluation.quality_metrics import QualityMetrics
 
 
 class BenchmarkSuite:
@@ -27,12 +28,20 @@ class BenchmarkSuite:
         self.device_info = None
         self.failed_models = []
     
+    @staticmethod
+    def evaluate_generated_outputs(generated_texts: List[str], references: List[str]) -> Dict[str, float]:
+        if len(generated_texts) != len(references):
+            raise ValueError("Generated texts and references must contain the same number of items")
+
+        return QualityMetrics.evaluate_multiple(references, generated_texts)
+
     def benchmark_model(
         self,
         config,
         prompts: List[str],
         quantization: str = None,
-        num_runs: int = 1
+        num_runs: int = 1,
+        references: Optional[List[str]] = None
     ) -> Optional[Dict]:
         """Benchmark a single 1B model"""
         
@@ -65,10 +74,23 @@ class BenchmarkSuite:
                 if num_runs > 1:
                     print(f"\n📍 Run {run + 1}/{num_runs}")
                 
-                _, metrics_list = self.inference_engine.batch_generate(model, tokenizer, prompts)
+                generated_texts, metrics_list = self.inference_engine.batch_generate(model, tokenizer, prompts)
                 all_metrics.extend(metrics_list)
+
+                if references is not None:
+                    generated_texts_for_run = generated_texts
+                else:
+                    generated_texts_for_run = None
             
             aggregated = self.inference_engine.aggregate_metrics(all_metrics)
+            quality_metrics = None
+
+            if references is not None and generated_texts_for_run is not None:
+                quality_metrics = self.evaluate_generated_outputs(generated_texts_for_run, references)
+
+            quality_score = config.quality_score
+            if quality_metrics is not None:
+                quality_score = quality_metrics.get('mean_similarity', quality_score)
             
             result = {
                 'model_name': config.model_name,
@@ -76,7 +98,8 @@ class BenchmarkSuite:
                 'model_size': config.size,
                 'disk_size_gb': config.disk_size_gb,
                 'ram_requirement_gb': config.min_ram_gb,
-                'quality_score': config.quality_score,
+                'quality_score': quality_score,
+                'quality_metrics': quality_metrics,
                 'metrics': aggregated,
                 'device_used': aggregated.get('device', 'unknown'),
                 'benchmark_date': datetime.now().isoformat(),
@@ -98,7 +121,8 @@ class BenchmarkSuite:
         self,
         prompts: List[str],
         models: List = None,
-        quantizations: List[str] = None
+        quantizations: List[str] = None,
+        references: Optional[List[str]] = None
     ) -> Dict:
         """Benchmark all 1B models"""
         
@@ -118,7 +142,13 @@ class BenchmarkSuite:
         successful = 0
         for model_config in models:
             for quant in quantizations:
-                result = self.benchmark_model(model_config, prompts, quantization=quant, num_runs=1)
+                result = self.benchmark_model(
+                    model_config,
+                    prompts,
+                    quantization=quant,
+                    num_runs=1,
+                    references=references
+                )
                 if result is not None:
                     successful += 1
         
@@ -146,6 +176,11 @@ class BenchmarkSuite:
         print(f"  RAM:       {result['ram_requirement_gb']} GB")
         print(f"  Latency:   {m['mean_latency']:.3f}s")
         print(f"  Speed:     {m['mean_tps']:.1f} tokens/sec")
+        if result.get('quality_metrics'):
+            qm = result['quality_metrics']
+            print(f"  BLEU:      {qm['mean_bleu']:.3f}")
+            print(f"  ROUGE-L:   {qm['mean_rouge_l']:.3f}")
+            print(f"  Similarity:{qm['mean_similarity']:.3f}")
         print(f"  Quality:   {result['quality_score']:.2f}/1.0")
         print(f"{'─'*70}\n")
     

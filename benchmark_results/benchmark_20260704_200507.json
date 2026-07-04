@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-07-04T20:05:07.411532",
+  "results": {},
+  "failed_models": [
+    {
+      "model": "TinyLlama-1.1B",
+      "reason": "Failed to load"
+    },
+    {
+      "model": "DistilGPT2",
+      "reason": "Failed to load"
+    }
+  ],
+  "summary": {
+    "successful": 0,
+    "failed": 2,
+    "total_disk_used_gb": 0
+  }
+}

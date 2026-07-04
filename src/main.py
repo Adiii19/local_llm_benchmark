@@ -57,6 +57,7 @@ def run_complete_benchmark():
     print("-"*80)
     test_data = load_test_prompts()
     prompts = [item['prompt'] for item in test_data]
+    references = [item.get('reference_answer', '') for item in test_data]
     print(f"✓ Loaded {len(prompts)} prompts\n")
     
     print("⚡ Step 5: Run Benchmarks")
@@ -70,7 +71,8 @@ def run_complete_benchmark():
     results = suite.benchmark_all_models(
         prompts=prompts,
         models=[TINYLLAMA_1B, DISTILGPT2],
-        quantizations=['none']
+        quantizations=['none'],
+        references=references
     )
     
     if results:

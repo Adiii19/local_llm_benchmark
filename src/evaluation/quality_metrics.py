@@ -19,11 +19,11 @@ class QualityMetrics:
 
         for n in range(1,min(n_grams+1,len(ref_tokens)+1)):
             ref_ngrams=Counter(
-                tuple(ref_tokens[i:i+n] for i in range(len(ref_tokens)-n+1))
+                tuple(tuple(ref_tokens[i:i+n]) for i in range(len(ref_tokens)-n+1))
 
             )
             hyp_ngrams=Counter(
-                tuple(hyp_tokens[i:i+n]for i in range(len(hyp_tokens)-n+1))
+                tuple(tuple(hyp_tokens[i:i+n]) for i in range(len(hyp_tokens)-n+1))
             )
 
             mathces=sum((hyp_ngrams&ref_ngrams).values())

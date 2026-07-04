@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-07-04T20:14:48.553985",
+  "results": {
+    "TinyLlama-1.1B": {
+      "model_name": "TinyLlama-1.1B",
+      "model_id": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+      "model_size": "1.1B",
+      "disk_size_gb": 2.2,
+      "ram_requirement_gb": 3,
+      "quality_score": 0.09284524834912433,
+      "quality_metrics": {
+        "mean_bleu": 0.0,
+        "mean_rouge_l": 0.12181409730548369,
+        "mean_similarity": 0.09284524834912433,
+        "mean_length_ratio": 0.3246226746226747,
+        "num_pairs": 5
+      },
+      "metrics": {
+        "mean_latency": 5.453911304473877,
+        "median_latency": 0.30063867568969727,
+        "std_latency": 10.318605809855836,
+        "min_latency": 0.27085351943969727,
+        "max_latency": 26.09110713005066,
+        "mean_tps": 3.703291139632983,
+        "median_tps": 3.354047916066916,
+        "std_tps": 0.620768227306147,
+        "min_tps": 3.2382371493225595,
+        "max_tps": 4.905886107553285,
+        "device": "cpu",
+        "num_runs": 5
+      },
+      "device_used": "cpu",
+      "benchmark_date": "2026-07-04T20:14:48.155784"
+    }
+  },
+  "failed_models": [
+    {
+      "model": "DistilGPT2",
+      "reason": "Failed to load"
+    }
+  ],
+  "summary": {
+    "successful": 1,
+    "failed": 1,
+    "total_disk_used_gb": 2.2
+  }
+}
