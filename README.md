@@ -445,12 +445,6 @@ This project is licensed under the MIT License - see LICENSE file for details.
 
 ---
 
-## 🙋 Support
-
-- 📖 Read the documentation
-- 🐛 Found a bug? Open an issue
-- 💡 Have ideas? Start a discussion
-- 📧 Email: your.email@example.com
 
 ---
 
